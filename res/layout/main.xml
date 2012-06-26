@@ -4,9 +4,17 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/main_text_view"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >    
 
+	    <LinearLayout
+	        android:id="@+id/pmworks_table"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="vertical" >
+
+    	</LinearLayout>
+	</ScrollView>
 </LinearLayout>

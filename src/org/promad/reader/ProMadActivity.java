@@ -21,6 +21,9 @@ import android.app.Activity;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 public class ProMadActivity extends Activity {
@@ -29,9 +32,7 @@ public class ProMadActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        TextView textView = (TextView)findViewById(R.id.main_text_view);
         Typeface tf = Typeface.createFromAsset(this.getAssets(), "fonts/TSC_Comic.ttf");
-        textView.setTypeface(tf);
 
         String url = "http://apify.heroku.com/api/tsciipmadurai.json";
         HttpClient client = new DefaultHttpClient();
@@ -82,27 +83,47 @@ public class ProMadActivity extends Activity {
 			e.printStackTrace();
 		}
 
-        byte[] responseText = null;
-        String responseString = "";
+        LinearLayout pmworks_table = (LinearLayout) findViewById(R.id.pmworks_table);
         try {
         	JSONArray jsonArray = new JSONArray(buff.toString());
         	for (int i = 0; i < 111; i++) {
             	JSONObject jsonObject = jsonArray.getJSONObject(i);
-            	responseString += "title: " + jsonObject.getString("title");
-            	responseString += ", author: " + jsonObject.getString("author");
-            	responseString += ", urls: " + jsonObject.getJSONArray("tscii_url") + "\n";
+            	pmworks_table.addView(getRow(jsonObject, tf));
             }
 		} catch (JSONException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-        try {
-        	responseText = responseString.getBytes("ISO-8859-1");
+    }
+    
+    private TextView createView(String text, Typeface tf){
+    	TextView view = new TextView(getApplicationContext());
+    	view.setTypeface(tf);
+    	view.setText(decode(text));
+		return view;
+    }
+    
+    private String decode(String text){
+    	try {
+    		return new String(text.getBytes("ISO-8859-1"), Charset.forName("ISO-8859-1"));
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
-        Log.d("Promad", responseText.toString());
-        textView.setText(new String(responseText, Charset.forName("ISO-8859-1")));
+    	return "Exception occured while decoding";
+    }
+    
+    private LinearLayout getRow(JSONObject jsonObject, Typeface tf) throws JSONException{
+    	LinearLayout layout = new LinearLayout(getApplicationContext());
+    	layout.setOrientation(LinearLayout.VERTICAL);
+    	layout.addView(createView(jsonObject.getString("title"), tf));
+    	layout.addView(createView(jsonObject.getString("author"), tf));
+    	JSONArray urls = jsonObject.getJSONArray("tscii_url");
+    	String urlStrings = "";
+    	for(int j=0; j < urls.length(); j++){
+    		urlStrings += "http://www.projectmadurai.org" + urls.getString(j);
+    	}
+    	layout.addView(createView(urlStrings, tf));
+		return layout;
     }
 }
